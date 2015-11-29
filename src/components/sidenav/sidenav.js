@@ -55,6 +55,10 @@ angular
  * // Sync check to whether given sidenav is locked open
  * // If this is true, the sidenav will be open regardless of close()
  * $mdSidenav(componentId).isLockedOpen();
+ * // On close callback to handle close, backdrop click or escape key pressed
+ * $mdSidenav(componentId).onClose(function () {
+ *   $log.debug('closing');
+ * });
  * </hljs>
  */
 function SidenavService($mdComponentRegistry, $q) {
@@ -78,6 +82,10 @@ function SidenavService($mdComponentRegistry, $q) {
       },
       isLockedOpen: function() {
         return instance && instance.isLockedOpen();
+      },
+      onClose: function (callback) {
+        if (instance) instance.onClose = callback;
+        return instance;
       },
       // -----------------
       // Async methods
@@ -336,6 +344,8 @@ function SidenavDirective($mdMedia, $mdUtil, $mdConstant, $mdTheming, $animate, 
         return $q.when(true);
 
       } else {
+        if (scope.isOpen && sidenavCtrl.onClose) sidenavCtrl.onClose();
+
         return $q(function(resolve){
           // Toggle value to force an async `updateIsOpen()` to run
           scope.isOpen = isOpen;
